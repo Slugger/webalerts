@@ -7,6 +7,7 @@ import groovy.util.logging.Log4j
 import org.apache.log4j.Logger
 import org.apache.velocity.app.Velocity
 import org.apache.velocity.runtime.RuntimeConstants
+import org.apache.velocity.runtime.log.Log4JLogChute
 import org.simplejavamail.email.Email
 import org.simplejavamail.email.EmailBuilder
 import org.simplejavamail.mailer.MailerBuilder
@@ -112,6 +113,7 @@ class Launcher implements Runnable {
         Velocity.setProperty('file.resource.loader.path', new File(appRoot, 'tmpls').absolutePath)
         Velocity.setProperty(RuntimeConstants.INPUT_ENCODING, 'UTF-8')
         Velocity.setProperty(RuntimeConstants.OUTPUT_ENCODING, 'UTF-8')
+        Velocity.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, Log4JLogChute.name)
         Velocity.setProperty('runtime.log.logsystem.log4j.logger', 'velocity')
         Velocity.init()
     }
