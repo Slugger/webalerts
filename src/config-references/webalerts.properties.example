@@ -1,0 +1,36 @@
+### Application properties
+##########################
+### The base directory for all app files
+### Scripts (scripts) and templates (tmpls) are only
+### read from this location.  Custom classpath entries
+### (lib) can also optionally be placed under this root
+### REQUIRED
+appRoot = /home/user/tvalerts
+
+### When set, the output of your template processing
+### will be written to a file in this directory
+webRoot = /var/www/html
+
+### When an email notification is sent, this is the base
+### url used for the generated link
+### REQUIRED (if email notifications are enabled)
+urlRoot = https://my.webserver.com
+
+### When true, the template processing result is written to
+### disk; default is false if not set
+saveHtml = true
+
+### When true, email notifications will be sent
+### default is false when not set
+sendEmail = true
+
+### Email settings for notifications
+### all of these are required if sendEmail = true
+fromEmail = user@my.webserver.com
+toEmail = someone@hotmail.com
+smtpHost = localhost
+smtpPort = 25
+
+### You are free to add any custom properties you want which are then
+### available in your script via the 'props' Map variable
+#myCustomProp = Some value

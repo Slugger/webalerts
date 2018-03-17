@@ -1,0 +1,36 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+    }
+}
+
+group 'com.github.slugger.webalerts'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceCompatibility = 1.8
+mainClassName = 'com.github.slugger.webalerts.Bootstrapper'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.13'
+    compile 'org.apache.velocity:velocity:1.7'
+    compile 'org.apache.velocity:velocity-tools:2.0'
+    compile 'log4j:log4j:1.2.17'
+    compile 'org.simplejavamail:simple-java-mail:5.0.1'
+
+    runtime 'org.apache.ivy:ivy:2.4.0'
+    runtime 'org.slf4j:slf4j-log4j12:1.7.25'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
