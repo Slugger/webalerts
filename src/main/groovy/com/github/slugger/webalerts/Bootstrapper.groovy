@@ -1,11 +1,18 @@
 package com.github.slugger.webalerts
 
+import com.github.slugger.webalerts.actions.ExecuteScriptAction
+import com.github.slugger.webalerts.actions.NotificationProcessorAction
+import com.github.slugger.webalerts.actions.TemplateProcessorAction
 import com.github.slugger.webalerts.ctx.AppContext
 import com.github.slugger.webalerts.ioc.AppModule
+import com.github.slugger.webalerts.logging.Log4j2LogChute
 import com.google.inject.Guice
 import com.google.inject.Inject
+import groovy.util.logging.Log4j2
+import org.apache.velocity.app.Velocity
+import org.apache.velocity.runtime.RuntimeConstants
 
-// Isolated bootstrapper so we can set log4j props location
+@Log4j2
 class Bootstrapper implements Runnable {
 
     static void main(String[] args) {
@@ -16,53 +23,34 @@ class Bootstrapper implements Runnable {
     }
 
     private final AppContext ctx
-    private final Launcher launcher
+    private final ExecuteScriptAction executor
+    private final TemplateProcessorAction tmplProcessor
+    private final NotificationProcessorAction notifyProcessor
 
     private String[] args
 
     @Inject
-    Bootstrapper(AppContext ctx, Launcher launcher) {
+    Bootstrapper(AppContext ctx, ExecuteScriptAction executor, TemplateProcessorAction tmplProcessor, NotificationProcessorAction notifyProcessor) {
         this.ctx = ctx
-        this.launcher = launcher
+        this.executor = executor
+        this.tmplProcessor = tmplProcessor
+        this.notifyProcessor = notifyProcessor
     }
 
-    @Override
     void run() {
         ctx.properties = loadProps()
         parseProperties()
-        //System.properties.'log4j.configuration' = new File(ctx.appRoot, 'log4j.properties').toURI().toURL().toString()
         parseCommandLine()
-        launcher.run()
-    }
-
-    private void parseProperties() {
-        ctx.appRoot = new File(ctx.properties.appRoot)
-        ctx.templateRoot = new File(ctx.appRoot, 'tmpls')
-        ctx.scriptRoot = new File(ctx.appRoot, 'scripts')
-        if(ctx.properties.webRoot)
-            ctx.webRoot = new File(ctx.properties.webRoot)
-    }
-
-    private Properties loadProps() {
-        def props = new Properties()
-        def propsFile = new File(new File(System.properties.'user.home'), '.webalerts.properties')
-        propsFile.withReader('UTF-8') {
-            props.load(it)
+        initVelocity()
+        log.debug "Initial context:\n${ctx.debug()}"
+        try {
+            executor.run()
+            tmplProcessor.run()
+            notifyProcessor.run()
+        } catch(Throwable t) {
+            log.fatal 'Unexpected error', t
+            System.exit(1)
         }
-
-        ['appRoot'].each {
-            if(!props."$it")
-                throw new RuntimeException("Missing $it in $propsFile")
-        }
-
-        def dir = new File(props.appRoot)
-        if(!dir.isDirectory())
-            throw new RuntimeException("Defined appRoot is invalid! [$dir]")
-        def log4j = new File(dir, 'log4j.properties')
-        if(!log4j.canRead())
-            throw new RuntimeException("$log4j not found!")
-
-        props
     }
 
     private void parseCommandLine() {
@@ -84,4 +72,43 @@ class Bootstrapper implements Runnable {
         ctx.skipNotificationProcessing = opts.'skip-notification'
     }
 
+    private Properties loadProps() {
+        def props = new Properties()
+        def propsFile = new File(new File(System.properties.'user.home'), '.webalerts.properties')
+        propsFile.withReader('UTF-8') {
+            props.load(it)
+        }
+
+        ['appRoot'].each {
+            if(!props."$it")
+                throw new RuntimeException("Missing $it in $propsFile")
+        }
+
+        def dir = new File(props.appRoot)
+        if(!dir.isDirectory())
+            throw new RuntimeException("Defined appRoot is invalid! [$dir]")
+        def log4j = new File(dir, 'log4j2.xml')
+        if(!log4j.canRead())
+            throw new RuntimeException("$log4j not found!")
+
+        props
+    }
+
+    private void parseProperties() {
+        ctx.appRoot = new File(ctx.properties.appRoot)
+        ctx.templateRoot = new File(ctx.appRoot, 'tmpls')
+        ctx.scriptRoot = new File(ctx.appRoot, 'scripts')
+        if(ctx.properties.webRoot)
+            ctx.webRoot = new File(ctx.properties.webRoot)
+    }
+
+    private void initVelocity() {
+        Velocity.setProperty(RuntimeConstants.RESOURCE_LOADER, 'file')
+        Velocity.setProperty('file.resource.loader.path', ctx.templateRoot.absolutePath)
+        Velocity.setProperty(RuntimeConstants.INPUT_ENCODING, 'UTF-8')
+        Velocity.setProperty(RuntimeConstants.OUTPUT_ENCODING, 'UTF-8')
+        Velocity.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, Log4j2LogChute.name)
+        Velocity.setProperty('runtime.log.logsystem.log4j.logger', 'velocity')
+        Velocity.init()
+    }
 }

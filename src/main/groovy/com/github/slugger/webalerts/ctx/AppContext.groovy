@@ -1,7 +1,6 @@
 package com.github.slugger.webalerts.ctx
 
 import com.google.inject.Singleton
-import groovy.json.JsonOutput
 
 @Singleton
 class AppContext {

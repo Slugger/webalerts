@@ -3,12 +3,12 @@ package com.github.slugger.webalerts.actions
 import com.github.slugger.webalerts.ctx.AppContext
 import com.google.inject.Inject
 import groovy.json.JsonOutput
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 import org.simplejavamail.email.Email
 import org.simplejavamail.email.EmailBuilder
 import org.simplejavamail.mailer.MailerBuilder
 
-@Log4j
+@Log4j2
 class NotificationProcessorAction implements Action {
 
     private final AppContext ctx
@@ -36,7 +36,11 @@ class NotificationProcessorAction implements Action {
         } else if(Boolean.parseBoolean(ctx.properties.sendNotification?.trim())) {
             log.warn 'sendNotification = false; skipping notification processing'
             skip = true
+        } else if(ctx.skippedTemplate) {
+            log.warn 'No template was processed; skipping notification processing'
+            skip = true
         }
+        ctx.skippedNotification = skip
         skip
     }
 

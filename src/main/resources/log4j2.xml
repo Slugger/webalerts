@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{1.} - %msg%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="warn">
+      <AppenderRef ref="Console"/>
+    </Root>
+
+    <!--
+        The log level for the executing script.  When commented
+        out, the root logger level is used.  You would want to
+        set this explicitly if, for example, you are wanting to
+        debug your script but don't want to log all of the debug
+        info for the app.
+    -->
+    <!-- <Logger name="*SCRIPT*" level="warn" /> -->
+
+    <!--
+      Below is a list of 3rd party loggers used by the application.
+      You may want to reconfigure these to keep the log relatively
+      quiet while debugging other issues.
+    -->
+    <!--
+    <Logger name="velocity" level="error" />
+    <Logger name="org.simplejavamail" level="error" />
+    -->
+
+    <!--
+      Finally, add configuration for any loggers used by the script(s)
+      you will be executing thru this app.
+
+      Anything you don't explicitly configure will use the log level of
+      the root logger.
+    -->
+  </Loggers>
+</Configuration>

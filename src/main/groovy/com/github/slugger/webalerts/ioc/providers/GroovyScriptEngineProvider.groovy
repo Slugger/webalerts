@@ -5,9 +5,9 @@ import com.google.inject.Inject
 import com.google.inject.Provider
 import com.google.inject.Singleton
 import groovy.io.FileType
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 
-@Log4j
+@Log4j2
 @Singleton
 class GroovyScriptEngineProvider implements Provider<GroovyScriptEngine> {
 

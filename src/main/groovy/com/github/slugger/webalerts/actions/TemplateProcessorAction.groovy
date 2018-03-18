@@ -3,9 +3,9 @@ package com.github.slugger.webalerts.actions
 import com.github.slugger.webalerts.ctx.AppContext
 import com.github.slugger.webalerts.renderers.TemplateRenderer
 import com.google.inject.Inject
-import groovy.util.logging.Log4j
+import groovy.util.logging.Log4j2
 
-@Log4j
+@Log4j2
 class TemplateProcessorAction implements Action {
 
     private final AppContext ctx
