@@ -1,5 +1,6 @@
 package com.github.slugger.webalerts
 
+import com.github.slugger.webalerts.actions.CleanupAction
 import com.github.slugger.webalerts.actions.ExecuteScriptAction
 import com.github.slugger.webalerts.actions.NotificationProcessorAction
 import com.github.slugger.webalerts.actions.TemplateProcessorAction
@@ -26,15 +27,18 @@ class Bootstrapper implements Runnable {
     private final ExecuteScriptAction executor
     private final TemplateProcessorAction tmplProcessor
     private final NotificationProcessorAction notifyProcessor
+    private final CleanupAction cleanupAction
 
     private String[] args
 
     @Inject
-    Bootstrapper(AppContext ctx, ExecuteScriptAction executor, TemplateProcessorAction tmplProcessor, NotificationProcessorAction notifyProcessor) {
+    Bootstrapper(AppContext ctx, ExecuteScriptAction executor, TemplateProcessorAction tmplProcessor,
+                 NotificationProcessorAction notifyProcessor, CleanupAction cleanupAction) {
         this.ctx = ctx
         this.executor = executor
         this.tmplProcessor = tmplProcessor
         this.notifyProcessor = notifyProcessor
+        this.cleanupAction = cleanupAction
     }
 
     void run() {
@@ -58,9 +62,16 @@ class Bootstrapper implements Runnable {
         cli.x(longOpt: 'debug', 'Skip all post processing, dump script result to log')
         cli._(longOpt: 'skip-notification', 'Skip notification processing regardless of properties')
         cli._(longOpt: 'skip-template', 'Skip template processing regardless of properties')
+        cli._(longOpt: 'cleanup', args: 1, argName: 'days', 'Remove files older than specified number of days from defined web root; ignores script execution')
         cli.h(longOpt: 'help', 'Print this usage help and exit immediately')
         def opts = cli.parse(args)
-        if(opts.h || !opts.arguments()) {
+        if(opts == null) {
+            System.exit(1)
+        } else if(opts.'cleanup') {
+            ctx.webRootAge = opts.'cleanup'.toInteger()
+            cleanupAction.run()
+            System.exit(0)
+        } else if(opts.h || !opts.arguments()) {
             cli.usage()
             System.exit(1)
         }

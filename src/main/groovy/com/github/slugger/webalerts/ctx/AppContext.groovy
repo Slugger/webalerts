@@ -19,7 +19,8 @@ class AppContext {
         scriptResult: [type: Object, value: null],
         skippedTemplate: [type: Boolean, value: null],
         skippedNotification: [type: Boolean, value: null],
-        templateResult: [type: String, value: null]
+        templateResult: [type: String, value: null],
+        webRootAge: [type: Integer, value: null]
     ]
 
     @Override
